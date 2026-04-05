@@ -1,12 +1,12 @@
- services:
+services:
   postgres:
     image: postgres:16-alpine
     container_name: aiops-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-aiops}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aiops_password}
-      POSTGRES_DB: ${POSTGRES_DB:-ai_incident_db}
+      POSTGRES_USER: "${POSTGRES_USER:-aiops}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-aiops_password}"
+      POSTGRES_DB: "${POSTGRES_DB:-ai_incident_db}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -39,8 +39,8 @@
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://aiops:aiops_password@postgres:5432/ai_incident_db}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      DATABASE_URL: "${DATABASE_URL:-postgresql+asyncpg://aiops:aiops_password@postgres:5432/ai_incident_db}"
+      REDIS_URL: "${REDIS_URL:-redis://redis:6379/0}"
     volumes:
       - ./backend:/app
     ports:
@@ -50,6 +50,11 @@
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend:
     build:
@@ -58,7 +63,7 @@
     container_name: aiops-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_API_URL: "http://backend:8000"
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
@@ -70,8 +75,10 @@
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend
       - backend
