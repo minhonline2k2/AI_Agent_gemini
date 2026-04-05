@@ -1,7 +1,4 @@
-version: "3.8"
-
-services:
-  # === PostgreSQL Database ===
+ services:
   postgres:
     image: postgres:16-alpine
     container_name: aiops-postgres
@@ -20,7 +17,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # === Redis Cache + Queue ===
   redis:
     image: redis:7-alpine
     container_name: aiops-redis
@@ -35,7 +31,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # === FastAPI Backend ===
   backend:
     build:
       context: ./backend
@@ -55,13 +50,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # === Next.js Frontend ===
   frontend:
     build:
       context: ./frontend
@@ -75,17 +64,14 @@ services:
     depends_on:
       - backend
 
-  # === Nginx Reverse Proxy ===
   nginx:
     image: nginx:alpine
     container_name: aiops-nginx
     restart: unless-stopped
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend
       - backend
