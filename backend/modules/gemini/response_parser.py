@@ -1,33 +1,23 @@
-"""
-modules/gemini/response_parser.py - Parse va validate response tu Gemini
-Dung Pydantic de dam bao Gemini tra dung format
-"""
 import json
+import re
 from schemas.shared_contract import RCAOutput
 
-
-def parse_gemini_response(response_text: str) -> RCAOutput:
-    """
-    Parse response tu Gemini thanh RCAOutput schema.
-    Neu Gemini tra sai format -> raise ValueError
-    """
+def parse_gemini_response(text):
+    cleaned = text.strip()
+    
+    # Bo markdown code blocks
+    cleaned = re.sub(r'^```json\s*', '', cleaned)
+    cleaned = re.sub(r'^```\s*', '', cleaned)
+    cleaned = re.sub(r'\s*```$', '', cleaned)
+    cleaned = cleaned.strip()
+    
+    # Tim JSON object trong text
+    match = re.search(r'\{[\s\S]*\}', cleaned)
+    if match:
+        cleaned = match.group(0)
+    
     try:
-        # Loai bo markdown code blocks neu co
-        cleaned = response_text.strip()
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[7:]
-        if cleaned.startswith("```"):
-            cleaned = cleaned[3:]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-        cleaned = cleaned.strip()
-
         data = json.loads(cleaned)
-        # Validate bang Pydantic
-        result = RCAOutput(**data)
-        return result
-
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Gemini response is not valid JSON: {e}")
+        return RCAOutput(**data)
     except Exception as e:
-        raise ValueError(f"Gemini response does not match schema: {e}")
+        raise ValueError(f"Cannot parse: {e}")
