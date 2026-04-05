@@ -1,0 +1,15 @@
+[Unit]
+Description=AI Incident Private Diagnostic Agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/private-agent
+Environment=PATH=/opt/private-agent/venv/bin:/usr/bin:/bin
+ExecStart=/opt/private-agent/venv/bin/python agent.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

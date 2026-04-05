@@ -1,0 +1,9 @@
+.env
+*.pyc
+__pycache__/
+node_modules/
+.next/
+nginx/ssl/*.pem
+nginx/ssl/*.key
+*.log
+.DS_Store
