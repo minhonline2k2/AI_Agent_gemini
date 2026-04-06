@@ -296,6 +296,7 @@ const NAV = [
 
 export default function MainApp() {
   const [page, setPage] = useState('dashboard')
+  const [chatMsgs, setChatMsgs] = useState<any[]>([])
 
   return (
     <div className="min-h-screen flex">
@@ -315,7 +316,7 @@ export default function MainApp() {
       <main className="flex-1 ml-56 p-6 overflow-y-auto">
         {page === 'dashboard' && <DashboardContent />}
         {page === 'incidents' && <IncidentsContent />}
-        {page === 'chat' && <ChatContent />}
+        {page === 'chat' && <ChatContent msgs={chatMsgs} setMsgs={setChatMsgs} />}
         {page === 'sysinfo' && <SystemInfoContent />}
         {page === 'knowledge' && <KnowledgeContent />}
         {page === 'governance' && <GovernanceContent />}
